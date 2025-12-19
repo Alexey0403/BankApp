@@ -13,10 +13,11 @@ namespace BankBackendApp.Repositories
             _context = context;
         }
 
-        public ICollection<Deposit> GetDeposits()
+        public ICollection<Deposit> GetDepositsByUser(int userId)
         {
             return _context.deposit
-                .OrderBy(u => u.id)
+                .Where(d => d.user_id == userId)
+                .OrderByDescending(d => d.created_at)
                 .ToList();
         }
     }

@@ -34,6 +34,17 @@ namespace BankBackendApp.Repositories
             return Save();
         }
 
+        public Card GetCard(int cardId)
+        {
+            return _context.card.FirstOrDefault(c => c.id == cardId);
+        }
+
+        public bool UpdateCard(Card card)
+        {
+            _context.card.Update(card);
+            return Save();
+        }
+
         public bool Save()
         {
             return _context.SaveChanges() > 0;

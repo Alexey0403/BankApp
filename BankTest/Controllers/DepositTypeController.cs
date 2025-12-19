@@ -1,4 +1,6 @@
-﻿using BankBackendApp.Interfaces;
+﻿using AutoMapper;
+using BankBackendApp.Dto;
+using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,22 +11,24 @@ namespace BankBackendApp.Controllers
     public class DepositTypeController : Controller
     {
         private readonly IDepositTypeRepository _depositTypeRepository;
+        private readonly IMapper _mapper;
 
-        public DepositTypeController(IDepositTypeRepository depositTypeRepository)
+        public DepositTypeController(IDepositTypeRepository depositTypeRepository, IMapper mapper)
         {
             _depositTypeRepository = depositTypeRepository;
+            _mapper = mapper;
         }
 
+        // GET api/DepositType
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<DepositType>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<DepositTypeDto>))]
         public IActionResult GetDepositTypes()
         {
-            var deposit_types = _depositTypeRepository.GetDepositTypes();
+            var depositTypes = _depositTypeRepository.GetDepositTypes();
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var result = _mapper.Map<IEnumerable<DepositTypeDto>>(depositTypes);
 
-            return Ok(deposit_types);
+            return Ok(result);
         }
     }
 }

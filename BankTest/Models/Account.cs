@@ -16,7 +16,7 @@
         public ICollection<Card> Cards { get; set; }
         public ICollection<Transaction> TransactionsFrom { get; set; }
         public ICollection<Transaction> TransactionsTo { get; set; }
-        public ICollection<Deposit> Deposits { get; set; }
+
     }
 
 }

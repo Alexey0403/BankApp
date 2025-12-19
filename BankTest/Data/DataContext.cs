@@ -73,12 +73,6 @@ namespace BankBackendApp.Data
                 .HasForeignKey(d => d.user_id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // DEPOSIT → ACCOUNT
-            modelBuilder.Entity<Deposit>()
-                .HasOne(d => d.Account)
-                .WithMany(a => a.Deposits)
-                .HasForeignKey(d => d.account_id)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // DEPOSIT → CURRENCY
             modelBuilder.Entity<Deposit>()

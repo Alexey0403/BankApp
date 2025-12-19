@@ -33,6 +33,12 @@ namespace BankBackendApp.Repositories
             return Save();
         }
 
+        public bool UpdateAccount(Account account)
+        {
+            _context.account.Update(account);
+            return Save();
+        }
+
         public bool Save()
         {
             return _context.SaveChanges() > 0;

@@ -5,8 +5,9 @@ using BankBackendApp.Models;
 using BankBackendApp.Repositories;
 using BankBackendApp.Services;
 using Microsoft.EntityFrameworkCore;
-using static BankBackendApp.Interfaces.ICardGenerationService;
-using static BankBackendApp.Services.CardGeneratorService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,29 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionStatusRepository, TransactionStatusRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICardService, CardService>();
-builder.Services.AddScoped<ICardGeneratorService, CardGeneratorService>();
+builder.Services.AddScoped<IDepositService, DepositService>();
+builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Security:Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Security:Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Security:Jwt:Key"]!)
+            )
+        };
+    });
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 // Generate JSON OpenAPI
@@ -60,6 +83,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

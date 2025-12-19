@@ -4,7 +4,6 @@
     {
         public int id { get; set; }
         public int user_id { get; set; }
-        public int account_id { get; set; }
         public int deposit_type_id { get; set; }
         public int currency_id { get; set; }
         public decimal amount { get; set; }
@@ -15,7 +14,6 @@
         public DateTime created_at { get; set; }
 
         public User User { get; set; }
-        public Account Account { get; set; }
         public DepositType DepositType { get; set; }
         public Currency Currency { get; set; }
     }

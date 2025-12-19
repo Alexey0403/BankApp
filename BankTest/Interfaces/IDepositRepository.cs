@@ -4,6 +4,6 @@ namespace BankBackendApp.Interfaces
 {
     public interface IDepositRepository
     {
-        ICollection<Deposit> GetDeposits();
+        ICollection<Deposit> GetDepositsByUser(int userId);
     }
 }

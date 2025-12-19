@@ -11,7 +11,7 @@ namespace BankBackendApp.Models
         public DateOnly birthday { get; set; }
         public string gmail { get; set; }
         public string hash_password { get; set; }
-        public string publickey { get; set; }
+        public string? publickey { get; set; }
         public DateTime created_at { get; set; }
 
         public int role_id { get; set; }

@@ -8,6 +8,7 @@ namespace BankBackendApp.Interfaces
 
         Account GetAccount(int id);
         bool CreateAccount(Account account);
+        bool UpdateAccount(Account account);
         bool Save();
     }
 }

@@ -3,7 +3,6 @@ using BankBackendApp.Dto;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using static BankBackendApp.Services.CardGeneratorService;
 
 namespace BankBackendApp.Controllers
 {
@@ -22,16 +21,19 @@ namespace BankBackendApp.Controllers
             _cardService = cardService;
         }
 
-        [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Card>))]
-        public IActionResult GetCards()
+        [HttpGet("account/{accountId}")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<OutCardDto>))]
+        [ProducesResponseType(404)]
+        public IActionResult GetCardsByAccount(int accountId)
         {
-            var cards = _cardRepository.GetCards();
+            var cards = _cardRepository.GetCardsByAccount(accountId);
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (cards == null || !cards.Any())
+                return NotFound();
 
-            return Ok(cards);
+            var result = _mapper.Map<IEnumerable<OutCardDto>>(cards);
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -49,5 +51,48 @@ namespace BankBackendApp.Controllers
 
             return StatusCode(201);
         }
+
+        [HttpPut("{cardId}/close")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult CloseCard(int cardId)
+        {
+            var card = _cardRepository.GetCard(cardId);
+
+            if (card == null)
+                return NotFound();
+
+            if (!card.is_active)
+                return NoContent();
+
+            card.is_active = false;
+
+            if (!_cardRepository.UpdateCard(card))
+                return StatusCode(500, "Error while closing card");
+
+            return NoContent();
+        }
+
+        [HttpPut("{cardId}/reopen")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult ReopenCard(int cardId)
+        {
+            var card = _cardRepository.GetCard(cardId);
+
+            if (card == null)
+                return NotFound();
+
+            if (card.is_active)
+                return NoContent(); 
+
+            card.is_active = true;
+
+            if (!_cardRepository.UpdateCard(card))
+                return StatusCode(500, "Error while reopening card");
+
+            return NoContent();
+        }
+
     }
 }

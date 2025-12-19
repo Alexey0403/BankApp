@@ -27,6 +27,12 @@ namespace BankBackendApp.Helpers
                 .ForMember(dest => dest.currency_id, opt => opt.Ignore())
                 .ForMember(dest => dest.created_at, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.is_active, opt => opt.MapFrom(_ => true));
+            CreateMap<Card, OutCardDto>();
+            //DEPOSIT
+            CreateMap<Deposit, DepositDto>();
+
+            //DEPOSITTYPE
+            CreateMap<DepositType, DepositTypeDto>();
         }
     }
 }
