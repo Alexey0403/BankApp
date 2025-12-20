@@ -33,6 +33,9 @@ namespace BankBackendApp.Helpers
 
             //DEPOSITTYPE
             CreateMap<DepositType, DepositTypeDto>();
+
+            //TRANSACTION
+            CreateMap<Transaction, TransactionDto>();
         }
     }
 }

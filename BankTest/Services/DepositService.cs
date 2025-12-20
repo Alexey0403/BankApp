@@ -102,7 +102,7 @@ namespace BankBackendApp.Services
             {
                 var deposit = _context.deposit
                     .Include(d => d.DepositType)
-                    .FirstOrDefault(d => d.id == depositId && d.user_id == dto.user_id);
+                    .FirstOrDefault(d => d.id == depositId && d.user_id == user_id);
 
                 if (deposit == null || deposit.user_id != user_id)
                 {
@@ -123,7 +123,7 @@ namespace BankBackendApp.Services
                 }
 
                 var account = _context.account
-                    .FirstOrDefault(a => a.id == dto.account_id && a.user_id == dto.user_id);
+                    .FirstOrDefault(a => a.id == dto.account_id && a.user_id == user_id);
 
                 if (account == null)
                 {

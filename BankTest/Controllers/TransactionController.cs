@@ -1,6 +1,12 @@
-﻿using BankBackendApp.Interfaces;
+﻿using AutoMapper;
+using BankBackendApp.Dto;
+using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
+using BankBackendApp.Repositories;
+using BankBackendApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BankBackendApp.Controllers
 {
@@ -9,22 +15,51 @@ namespace BankBackendApp.Controllers
     public class TransactionController : Controller
     {
         private readonly ITransactionRepository _transactionRepository;
+        private readonly IMapper _mapper;
+        private readonly ITransactionService _transactionService;
 
-        public TransactionController(ITransactionRepository transactionRepository)
+        public TransactionController(ITransactionRepository transactionRepository, IMapper mapper, ITransactionService transactionService)
         {
             _transactionRepository = transactionRepository;
+            _mapper = mapper;
+            _transactionService = transactionService;
         }
 
-        [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Transaction>))]
-        public IActionResult GetTransactions()
+
+        [Authorize]
+        [HttpGet("mytransactions")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<TransactionDto>))]
+        [ProducesResponseType(401)]
+        public IActionResult GetMyTransactions()
         {
-            var transactions = _transactionRepository.GetTransactions();
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var transactions = _transactionRepository.GetTransactionsByUser(userId);
 
-            return Ok(transactions);
+            var result = _mapper.Map<IEnumerable<TransactionDto>>(transactions);
+            return Ok(result);
         }
+
+        [Authorize]
+        [HttpPost]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        public IActionResult CreateTransaction([FromBody] CreateTransactionDto dto)
+        {
+            var userId = int.Parse(
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
+            );
+
+            if (!_transactionService.CreateTransaction(userId, dto, out var error))
+                return BadRequest(error);
+
+            return StatusCode(201);
+        }
+
+
     }
 }

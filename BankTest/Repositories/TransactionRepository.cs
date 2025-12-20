@@ -19,5 +19,18 @@ namespace BankBackendApp.Repositories
                 .OrderBy(u => u.id)
                 .ToList();
         }
+
+        public ICollection<Transaction> GetTransactionsByUser(int userId)
+        {
+            return _context.transaction
+                .Where(t =>
+                    _context.account.Any(a =>
+                        a.user_id == userId &&
+                        (a.id == t.account_from_id || a.id == t.account_to_id)
+                    )
+                )
+                .OrderByDescending(t => t.created_at)
+                .ToList();
+        }
     }
 }
