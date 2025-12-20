@@ -2,6 +2,7 @@
 using BankBackendApp.Dto;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankBackendApp.Controllers
@@ -21,41 +22,59 @@ namespace BankBackendApp.Controllers
             _depositService = depositService;
         }
 
-        // GET api/Deposit/user/5
-        [HttpGet("user/{userId}")]
+        [Authorize]
+        [HttpGet("mydeposits")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<DepositDto>))]
+        [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public IActionResult GetDepositsByUser(int userId)
+        public IActionResult GetMyDeposits()
         {
+            var userId = int.Parse(
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
+            );
+
             var deposits = _depositRepository.GetDepositsByUser(userId);
 
             if (deposits == null || !deposits.Any())
                 return NotFound();
 
             var result = _mapper.Map<IEnumerable<DepositDto>>(deposits);
-
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPost]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         public IActionResult CreateDeposit([FromBody] CreateDepositDto dto)
         {
-            if (!_depositService.CreateDeposit(dto, out var error))
+            var userId = int.Parse(
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
+            );
+
+            if (!_depositService.CreateDeposit(userId, dto, out var error))
                 return BadRequest(error);
 
             return StatusCode(201);
         }
 
+        [Authorize]
         [HttpPut("{depositId}/add-money")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         public IActionResult AddMoneyToDeposit(int depositId, [FromBody] AddMoneyToDepositDto dto)
         {
-            if (!_depositService.AddMoneyToDeposit(depositId, dto, out var error))
+            var userId = int.Parse(
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
+            );
+
+            if (!_depositService.AddMoneyToDeposit(userId, depositId, dto, out var error))
                 return BadRequest(error);
 
             return NoContent();
         }
-
     }
 }

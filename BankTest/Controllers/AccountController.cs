@@ -14,11 +14,13 @@ namespace BankBackendApp.Controllers
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
+        private readonly IAccountService _accountService;
 
-        public AccountController(IAccountRepository accountRepository, IMapper mapper)
+        public AccountController(IAccountRepository accountRepository, IMapper mapper, IAccountService accountService)
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
+            _accountService = accountService;
         }
         [Authorize]
         [HttpGet("user/myaccounts")]
@@ -43,18 +45,27 @@ namespace BankBackendApp.Controllers
             return Ok(result);
         }
 
-        // POST api/Account
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         public IActionResult CreateAccount([FromBody] CreateAccountDto createAccountDto)
         {
             if (createAccountDto == null)
                 return BadRequest(ModelState);
 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            int userId = int.Parse(userIdClaim.Value);
+
             var account = _mapper.Map<Account>(createAccountDto);
 
-            account.number = $"{DateTime.UtcNow.Ticks}";
+            account.user_id = userId;
+
+            account.number = _accountService.Generate();
 
             if (!_accountRepository.CreateAccount(account))
             {
@@ -65,15 +76,23 @@ namespace BankBackendApp.Controllers
             return StatusCode(201);
         }
 
+        [Authorize]
         [HttpPut("{accountId}/close")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         public IActionResult CloseAccount(int accountId)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
             var account = _accountRepository.GetAccount(accountId);
 
             if (account == null)
                 return NotFound();
+
+            if (account.user_id != userId)
+                return Forbid();
 
             if (!account.is_active)
                 return NoContent();
@@ -86,15 +105,23 @@ namespace BankBackendApp.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpPut("{accountId}/reopen")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         public IActionResult ReopenAccount(int accountId)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);  
+
             var account = _accountRepository.GetAccount(accountId);
 
             if (account == null)
                 return NotFound();
+
+            if (account.user_id != userId)
+                return Forbid();
 
             if (account.is_active)
                 return NoContent();

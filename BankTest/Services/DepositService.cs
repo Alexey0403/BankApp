@@ -15,7 +15,7 @@ namespace BankBackendApp.Services
             _context = context;
         }
 
-        public bool CreateDeposit(CreateDepositDto dto, out string error)
+        public bool CreateDeposit(int user_id, CreateDepositDto dto, out string error)
         {
             error = string.Empty;
 
@@ -24,13 +24,15 @@ namespace BankBackendApp.Services
             try
             {
                 var account = _context.account
-                    .FirstOrDefault(a => a.id == dto.account_id && a.user_id == dto.user_id);
+                    .FirstOrDefault(a => a.id == dto.account_id && a.user_id == user_id);
 
-                if (account == null)
+                if (account == null || account.user_id != user_id)
                 {
-                    error = "Account not found";
+                    error = "Account not found or access denied";
                     return false;
                 }
+
+
 
                 if (account.currency_id != dto.currency_id)
                 {
@@ -61,7 +63,7 @@ namespace BankBackendApp.Services
 
                 var deposit = new Deposit
                 {
-                    user_id = dto.user_id,
+                    user_id = user_id,
                     deposit_type_id = dto.deposit_type_id,
                     currency_id = dto.currency_id,
                     amount = dto.amount,
@@ -89,9 +91,10 @@ namespace BankBackendApp.Services
                 return false;
             }
         }
-        public bool AddMoneyToDeposit(int depositId, AddMoneyToDepositDto dto, out string error)
+        public bool AddMoneyToDeposit(int user_id, int depositId, AddMoneyToDepositDto dto, out string error)
         {
             error = string.Empty;
+
 
             using var transaction = _context.Database.BeginTransaction();
 
@@ -101,9 +104,9 @@ namespace BankBackendApp.Services
                     .Include(d => d.DepositType)
                     .FirstOrDefault(d => d.id == depositId && d.user_id == dto.user_id);
 
-                if (deposit == null)
+                if (deposit == null || deposit.user_id != user_id)
                 {
-                    error = "Deposit not found";
+                    error = "Deposit not found or access denied";
                     return false;
                 }
 

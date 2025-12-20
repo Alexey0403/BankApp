@@ -4,7 +4,7 @@ namespace BankBackendApp.Interfaces
 {
     public interface IDepositService
     {
-        bool CreateDeposit(CreateDepositDto dto, out string error);
-        bool AddMoneyToDeposit(int depositId, AddMoneyToDepositDto dto, out string error);
+        bool CreateDeposit(int user_id, CreateDepositDto dto, out string error);
+        bool AddMoneyToDeposit(int user_id, int depositId, AddMoneyToDepositDto dto, out string error);
     }
 }
