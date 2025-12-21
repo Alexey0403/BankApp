@@ -8,7 +8,24 @@ namespace BankBackendApp.Helpers
         public MappingProfiles()
         {
             //USER
-            CreateMap<UpdateUserDto, User>();
+            CreateMap<User, UserDto>(); 
+
+            CreateMap<UpdateUserDto, User>()
+                .ForMember(dest => dest.id, opt => opt.Ignore())
+                .ForMember(dest => dest.gmail, opt => opt.Ignore())
+                .ForMember(dest => dest.phone_number, opt => opt.Ignore())
+                .ForMember(dest => dest.hash_password, opt => opt.Ignore())
+                .ForMember(dest => dest.publickey, opt => opt.Ignore())
+                .ForMember(dest => dest.created_at, opt => opt.Ignore()); 
+            CreateMap<User, AdminUserDto>();
+            CreateMap<AdminUpdateUserDto, User>()
+                .ForMember(dest => dest.id, opt => opt.Ignore())
+                .ForMember(dest => dest.gmail, opt => opt.Ignore())
+                .ForMember(dest => dest.phone_number, opt => opt.Ignore())
+                .ForMember(dest => dest.hash_password, opt => opt.Ignore())
+                .ForMember(dest => dest.publickey, opt => opt.Ignore())
+                .ForMember(dest => dest.created_at, opt => opt.Ignore());
+
             //ACCOUNT
             CreateMap<CreateAccountDto, Account>()
             .ForMember(dest => dest.balance, opt => opt.MapFrom(_ => 0))

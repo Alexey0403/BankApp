@@ -1,57 +1,50 @@
 ﻿using AutoMapper;
 using BankBackendApp.Dto;
 using BankBackendApp.Interfaces;
-using BankBackendApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace BankBackendApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/users")]
     [ApiController]
-    public class UserController : Controller
+    [Authorize(Roles = "Admin")]
+    public class AdminUserController : Controller
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public UserController(IUserRepository userRepository, IMapper mapper)
+        public AdminUserController(
+            IUserRepository userRepository,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
         }
 
-        [Authorize]
-        [HttpGet("myprofile")]
-        [ProducesResponseType(200, Type = typeof(UserDto))]
+        [HttpGet]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<AdminUserDto>))]
         [ProducesResponseType(401)]
-        public IActionResult GetMe()
+        [ProducesResponseType(403)]
+        public IActionResult GetUsers()
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
-            );
+            var users = _userRepository.GetUsers();
 
-            var user = _userRepository.GetUser(userId);
-            if (user == null)
-                return NotFound();
-
-            var result = _mapper.Map<UserDto>(user);
+            var result = _mapper.Map<IEnumerable<AdminUserDto>>(users);
             return Ok(result);
         }
 
-        [Authorize]
-        [HttpPut("myprofile/update")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{userId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         [ProducesResponseType(401)]
-        public IActionResult UpdateUser([FromBody] UpdateUserDto dto)
+        [ProducesResponseType(403)]
+        public IActionResult UpdateUser(int userId, [FromBody] AdminUpdateUserDto dto)
         {
             if (dto == null)
                 return BadRequest();
-
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
-            );
 
             var user = _userRepository.GetUser(userId);
             if (user == null)
@@ -66,4 +59,7 @@ namespace BankBackendApp.Controllers
         }
 
     }
+
+
+
 }

@@ -13,6 +13,13 @@ namespace BankBackendApp.Repositories
             _context = context;
         }
 
+        public ICollection<Account> GetAccounts()
+        {
+            return _context.account
+                .OrderBy(a => a.id)
+                .ToList();
+        }
+
         public ICollection<Account> GetAccountsByUser(int userId)
         {
             return _context.account
@@ -36,6 +43,12 @@ namespace BankBackendApp.Repositories
         public bool UpdateAccount(Account account)
         {
             _context.account.Update(account);
+            return Save();
+        }
+
+        public bool DeleteAccount(Account account)
+        {
+            _context.account.Remove(account);
             return Save();
         }
 
