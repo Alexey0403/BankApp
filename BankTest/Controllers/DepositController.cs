@@ -56,7 +56,9 @@ namespace BankBackendApp.Controllers
             if (!_depositService.CreateDeposit(userId, dto, out var error))
                 return BadRequest(error);
 
-            return StatusCode(201);
+            var result = _depositService.CreateDeposit(userId, dto, out var errorMessage);
+
+            return StatusCode(201, result);
         }
 
         [Authorize]

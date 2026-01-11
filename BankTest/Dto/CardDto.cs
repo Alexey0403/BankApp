@@ -21,4 +21,6 @@
         public int card_provider_id { get; set; }
     }
 
+
+
 }

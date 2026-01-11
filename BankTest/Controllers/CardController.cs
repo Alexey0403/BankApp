@@ -77,7 +77,7 @@ namespace BankBackendApp.Controllers
             if (!result)
                 return BadRequest("Cannot create card");
 
-            return StatusCode(201);
+            return StatusCode(201, result);
         }
 
         [Authorize]

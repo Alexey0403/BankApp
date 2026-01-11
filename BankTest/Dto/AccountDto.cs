@@ -8,5 +8,7 @@
         public bool is_active { get; set; }
         public int currency_id { get; set; }
         public DateTime created_at { get; set; }
+        public CurrencyDto Currency { get; set; }
+        public List<OutCardDto> Cards { get; set; }
     }
 }

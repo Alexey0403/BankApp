@@ -57,7 +57,9 @@ namespace BankBackendApp.Controllers
             if (!_transactionService.CreateTransaction(userId, dto, out var error))
                 return BadRequest(error);
 
-            return StatusCode(201);
+            var result = _transactionService.CreateTransaction(userId, dto, out var errorMessage);
+
+            return StatusCode(201, result);
         }
 
 
