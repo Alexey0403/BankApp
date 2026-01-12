@@ -35,7 +35,11 @@ namespace BankBackendApp.Repositories
 
         public Account GetAccount(int id)
         {
-            return _context.account.FirstOrDefault(a => a.id == id);
+            return _context.account
+                .Include(a => a.Currency)
+                .Include(a => a.Cards)
+                .FirstOrDefault(a => a.id == id);
+
         }
 
 

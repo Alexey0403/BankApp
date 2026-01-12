@@ -12,6 +12,9 @@
         public DateTime created_at { get; set; }
         public int deposit_type_id { get; set; }
         public int currency_id { get; set; }
+
+        public CurrencyDto Currency { get; set; }
+        public DepositTypeDto DepositType { get; set; }
     }
 }
 

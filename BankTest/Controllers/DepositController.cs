@@ -53,10 +53,12 @@ namespace BankBackendApp.Controllers
                 User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
             );
 
-            if (!_depositService.CreateDeposit(userId, dto, out var error))
+            var deposit = _depositService.CreateDeposit(userId, dto, out var error);
+
+            if (deposit == null)
                 return BadRequest(error);
 
-            var result = _depositService.CreateDeposit(userId, dto, out var errorMessage);
+            var result = _mapper.Map<DepositDto>(_depositRepository.GetDeposiById(deposit.id));
 
             return StatusCode(201, result);
         }

@@ -56,6 +56,9 @@ namespace BankBackendApp.Helpers
 
             //CURRENCY
             CreateMap<Currency, CurrencyDto>();
+            
+            //CARDPROVIDER
+            CreateMap<CardProvider, CardProviderDto>();
         }
     }
 }

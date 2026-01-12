@@ -31,11 +31,11 @@ namespace BankBackendApp.Services
             return (now.Month, now.Year + 4);
         }
 
-        public bool CreateCardForAccount(int accountId, int cardProviderId)
+        public Card CreateCardForAccount(int accountId, int cardProviderId)
         {
             var account = _accountRepository.GetAccount(accountId);
             if (account == null)
-                return false;
+                return null;
 
             var (month, year) = GenerateExpirationDate();
 
@@ -51,8 +51,8 @@ namespace BankBackendApp.Services
                 is_active = true,
                 created_at = DateTime.UtcNow
             };
-
-            return _cardRepository.CreateCard(card);
+            _cardRepository.CreateCard(card);
+            return card;
         }
     }
 }

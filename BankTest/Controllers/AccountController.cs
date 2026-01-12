@@ -73,7 +73,9 @@ namespace BankBackendApp.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var result = _mapper.Map<AccountDto>(account);
+            var result = _mapper.Map<AccountDto>(_accountRepository.GetAccount(account.id));
+
+
             return StatusCode(201, result);
 
         }

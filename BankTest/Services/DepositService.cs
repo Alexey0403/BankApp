@@ -15,7 +15,7 @@ namespace BankBackendApp.Services
             _context = context;
         }
 
-        public bool CreateDeposit(int user_id, CreateDepositDto dto, out string error)
+        public Deposit CreateDeposit(int user_id, CreateDepositDto dto, out string error)
         {
             error = string.Empty;
 
@@ -29,7 +29,7 @@ namespace BankBackendApp.Services
                 if (account == null || account.user_id != user_id)
                 {
                     error = "Account not found or access denied";
-                    return false;
+                    return null;
                 }
 
 
@@ -37,13 +37,13 @@ namespace BankBackendApp.Services
                 if (account.currency_id != dto.currency_id)
                 {
                     error = "Account currency mismatch";
-                    return false;
+                    return null;
                 }
 
                 if (account.balance < dto.amount)
                 {
                     error = "Insufficient funds";
-                    return false;
+                    return null;
                 }
 
                 var depositType = _context.deposit_type
@@ -52,13 +52,13 @@ namespace BankBackendApp.Services
                 if (depositType == null)
                 {
                     error = "Deposit type not found";
-                    return false;
+                    return null;
                 }
 
                 if (dto.months < depositType.min_months || dto.months > depositType.max_months)
                 {
                     error = "Invalid deposit duration";
-                    return false;
+                    return null;
                 }
 
                 var deposit = new Deposit
@@ -82,13 +82,13 @@ namespace BankBackendApp.Services
                 _context.SaveChanges();
                 transaction.Commit();
 
-                return true;
+                return deposit;
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
                 error = ex.Message;
-                return false;
+                return null;
             }
         }
         public bool AddMoneyToDeposit(int user_id, int depositId, AddMoneyToDepositDto dto, out string error)

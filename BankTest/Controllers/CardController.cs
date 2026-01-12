@@ -74,10 +74,12 @@ namespace BankBackendApp.Controllers
 
             var result = _cardService.CreateCardForAccount(dto.account_id, dto.card_provider_id);
 
-            if (!result)
+            if (result == null)
                 return BadRequest("Cannot create card");
 
-            return StatusCode(201, result);
+            var output = _mapper.Map<OutCardDto>(_cardRepository.GetCard(result.id));
+
+            return StatusCode(201, output);
         }
 
         [Authorize]

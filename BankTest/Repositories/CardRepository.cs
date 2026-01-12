@@ -1,6 +1,7 @@
 ﻿using BankBackendApp.Data;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankBackendApp.Repositories
 {
@@ -16,6 +17,8 @@ namespace BankBackendApp.Repositories
         public ICollection<Card> GetCards()
         {
             return _context.card
+                .Include(c => c.Currency)
+                .Include(c => c.CardProvider)
                 .OrderBy(u => u.id)
                 .ToList();
         }
@@ -23,6 +26,8 @@ namespace BankBackendApp.Repositories
         public ICollection<Card> GetCardsByAccount(int accountId)
         {
             return _context.card
+                .Include(c => c.Currency)
+                .Include(c => c.CardProvider)
                 .Where(c => c.account_id == accountId)
                 .OrderBy(c => c.id)
                 .ToList();
@@ -36,7 +41,10 @@ namespace BankBackendApp.Repositories
 
         public Card GetCard(int cardId)
         {
-            return _context.card.FirstOrDefault(c => c.id == cardId);
+            return _context.card
+                .Include(c => c.Currency)
+                .Include(c => c.CardProvider)
+                .FirstOrDefault(c => c.id == cardId);
         }
 
         public bool UpdateCard(Card card)

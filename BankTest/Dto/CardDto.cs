@@ -1,4 +1,6 @@
-﻿namespace BankBackendApp.Dto
+﻿using BankBackendApp.Models;
+
+namespace BankBackendApp.Dto
 {
     public class CardDto
     {
@@ -19,6 +21,9 @@
 
         public int currency_id { get; set; }
         public int card_provider_id { get; set; }
+
+        public CurrencyDto Currency { get; set; }
+        public CardProviderDto CardProvider { get; set; }
     }
 
 

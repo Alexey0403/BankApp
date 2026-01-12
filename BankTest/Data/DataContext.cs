@@ -20,7 +20,7 @@ namespace BankBackendApp.Data
         public DbSet<Signature> signature { get; set; }
         public DbSet<Deposit> deposit { get; set; }
         public DbSet<DepositType> deposit_type { get; set; }
-        public DbSet<CardProvider> CardProviders { get; set; }
+        public DbSet<CardProvider> card_provider { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
