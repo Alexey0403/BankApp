@@ -11,6 +11,10 @@
         public string recipients_surname { get; set; }
         public int status_id { get; set; }
         public DateTime created_at { get; set; }
-        
+
+        public AccountDto AccountFrom { get; set; }
+        public AccountDto AccountTo { get; set;}
+
+        public TransactionStatusDto Status { get; set; }
     }
 }

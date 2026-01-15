@@ -1,9 +1,10 @@
 ﻿using BankBackendApp.Dto;
+using BankBackendApp.Models;
 
 namespace BankBackendApp.Interfaces
 {
     public interface ITransactionService
     {
-        bool CreateTransaction(int userId, CreateTransactionDto dto, out string error);
+        Transaction CreateTransaction(int userId, CreateTransactionDto dto, out string error);
     }
 }

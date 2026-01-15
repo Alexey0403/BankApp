@@ -15,7 +15,7 @@ namespace BankBackendApp.Services
             _context = context;
         }
 
-        public bool CreateTransaction(int userId, CreateTransactionDto dto, out string error)
+        public Transaction CreateTransaction(int userId, CreateTransactionDto dto, out string error)
         {
             error = string.Empty;
 
@@ -24,36 +24,36 @@ namespace BankBackendApp.Services
             try
             {
 
-                var fromAccount = _context.account.FirstOrDefault(a => a.id == dto.account_from_id);
+                var fromAccount = _context.account.FirstOrDefault(a => a.number == dto.number_account_from);
                 if (fromAccount == null)
                 {
                     error = "Sender account not found";
-                    return false;
+                    return null;
                 }
 
                 if (fromAccount.user_id != userId)
                 {
                     error = "Access denied";
-                    return false;
+                    return null;
                 }
 
-                var toAccount = _context.account.FirstOrDefault(a => a.id == dto.account_to_id);
+                var toAccount = _context.account.FirstOrDefault(a => a.number == dto.number_account_to);
                 if (toAccount == null)
                 {
                     error = "Recipient account not found";
-                    return false;
+                    return null;
                 }
 
                 if (fromAccount.currency_id != toAccount.currency_id)
                 {
                     error = "Account currencies do not match";
-                    return false;
+                    return null;
                 }
 
                 if (fromAccount.balance < dto.amount)
                 {
                     error = "Insufficient funds";
-                    return false;
+                    return null;
                 }
 
                 var signature = new Signature
@@ -84,13 +84,13 @@ namespace BankBackendApp.Services
                 _context.transaction.Add(transaction);
                 _context.SaveChanges();
                 dbTransaction.Commit();
-                return true;
+                return transaction;
             }
             catch (Exception ex)
             {
                 dbTransaction.Rollback();
                 error = ex.Message;
-                return false;
+                return null;
             }
         }
 

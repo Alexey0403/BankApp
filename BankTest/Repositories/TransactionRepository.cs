@@ -1,6 +1,7 @@
 ﻿using BankBackendApp.Data;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankBackendApp.Repositories
 {
@@ -23,6 +24,9 @@ namespace BankBackendApp.Repositories
         public ICollection<Transaction> GetTransactionsByUser(int userId)
         {
             return _context.transaction
+                .Include(t => t.AccountFrom)
+                .Include(t => t.AccountTo)
+                .Include(ts => ts.Status)
                 .Where(t =>
                     _context.account.Any(a =>
                         a.user_id == userId &&

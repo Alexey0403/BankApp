@@ -54,10 +54,12 @@ namespace BankBackendApp.Controllers
                 User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
             );
 
-            if (!_transactionService.CreateTransaction(userId, dto, out var error))
+            var transaction = _transactionService.CreateTransaction(userId, dto, out var error);
+
+            if (transaction == null)
                 return BadRequest(error);
 
-            var result = _transactionService.CreateTransaction(userId, dto, out var errorMessage);
+            var result = _mapper.Map<TransactionDto>(transaction);
 
             return StatusCode(201, result);
         }

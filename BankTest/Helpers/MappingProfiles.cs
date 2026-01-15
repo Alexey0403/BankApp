@@ -59,6 +59,9 @@ namespace BankBackendApp.Helpers
             
             //CARDPROVIDER
             CreateMap<CardProvider, CardProviderDto>();
+
+            //TRANSACTIONSTATUS
+            CreateMap<TransactionStatus, TransactionStatusDto>();
         }
     }
 }
