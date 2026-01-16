@@ -41,7 +41,7 @@ namespace BankBackendApp.Controllers
 
         [Authorize]
         [HttpPut("myprofile/update")]
-        [ProducesResponseType(204)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         public IActionResult UpdateUser([FromBody] UpdateUserDto dto)
@@ -57,12 +57,17 @@ namespace BankBackendApp.Controllers
             if (user == null)
                 return NotFound();
 
+            if (user.publickey != null)
+                return StatusCode(500, "Public key is already exists");
+
             _mapper.Map(dto, user);
 
             if (!_userRepository.UpdateUser(user))
                 return StatusCode(500, "Error while updating user");
 
-            return NoContent();
+            var result = _mapper.Map<UserDto>(_userRepository.GetUser(user.id));
+
+            return StatusCode(201, result);
         }
 
     }

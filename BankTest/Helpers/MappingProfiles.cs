@@ -15,7 +15,6 @@ namespace BankBackendApp.Helpers
                 .ForMember(dest => dest.gmail, opt => opt.Ignore())
                 .ForMember(dest => dest.phone_number, opt => opt.Ignore())
                 .ForMember(dest => dest.hash_password, opt => opt.Ignore())
-                .ForMember(dest => dest.publickey, opt => opt.Ignore())
                 .ForMember(dest => dest.created_at, opt => opt.Ignore()); 
             CreateMap<User, AdminUserDto>();
             CreateMap<AdminUpdateUserDto, User>()
