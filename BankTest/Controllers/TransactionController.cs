@@ -59,7 +59,7 @@ namespace BankBackendApp.Controllers
             if (transaction == null)
                 return BadRequest(error);
 
-            var result = _mapper.Map<TransactionDto>(transaction);
+            var result = _mapper.Map<TransactionDto>(_transactionRepository.GetTransactionById(transaction.id));
 
             return StatusCode(201, result);
         }

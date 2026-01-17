@@ -25,8 +25,10 @@ namespace BankBackendApp.Repositories
         {
             return _context.transaction
                 .Include(t => t.AccountFrom)
+                    .ThenInclude(af => af.Currency)
                 .Include(t => t.AccountTo)
-                .Include(ts => ts.Status)
+                    .ThenInclude(at => at.Currency)
+                .Include(t => t.Status)
                 .Where(t =>
                     _context.account.Any(a =>
                         a.user_id == userId &&
@@ -35,6 +37,18 @@ namespace BankBackendApp.Repositories
                 )
                 .OrderByDescending(t => t.created_at)
                 .ToList();
+        }
+
+        public Transaction GetTransactionById(int id) {
+
+            return _context.transaction
+                .Include(t => t.AccountFrom)
+                    .ThenInclude(af => af.Currency)
+                .Include(t => t.AccountTo)
+                    .ThenInclude(at => at.Currency)
+                .Include(t => t.Status)
+                .FirstOrDefault(t => t.id == id);
+
         }
     }
 }
