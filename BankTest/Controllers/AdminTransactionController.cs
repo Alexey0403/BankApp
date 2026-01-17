@@ -3,61 +3,58 @@ using BankBackendApp.Dto;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
 using BankBackendApp.Repositories;
-using BankBackendApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BankBackendApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/transactions")]
     [ApiController]
-    public class TransactionController : Controller
+    [Authorize(Policy = "Admin")]
+    public class AdminTransactionController : Controller
     {
         private readonly ITransactionRepository _transactionRepository;
-        private readonly IMapper _mapper;
         private readonly ITransactionService _transactionService;
+        private readonly IMapper _mapper;
 
-        public TransactionController(ITransactionRepository transactionRepository, IMapper mapper, ITransactionService transactionService)
+        public AdminTransactionController(ITransactionRepository transactionRepository, ITransactionService transactionService, IMapper mapper)
         {
             _transactionRepository = transactionRepository;
-            _mapper = mapper;
             _transactionService = transactionService;
+            _mapper = mapper;
         }
 
-
         [Authorize]
-        [HttpGet("mytransactions")]
+        [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<TransactionDto>))]
         [ProducesResponseType(401)]
-        public IActionResult GetMyTransactions()
+        [ProducesResponseType(403)]
+        public IActionResult GetTransactions()
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
-            );
-
-            var transactions = _transactionRepository.GetTransactionsByUser(userId);
+            var transactions = _transactionRepository.GetTransactions();
 
             var result = _mapper.Map<IEnumerable<TransactionDto>>(transactions);
             return Ok(result);
         }
 
         [Authorize]
-        [HttpPost]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400)]
+        [HttpPut("confirmtransaction")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
-        public IActionResult CreateTransaction([FromBody] CreateTransactionDto dto)
+        public IActionResult ConfirmTransaction(int transactionId)
         {
-            var userId = int.Parse(
-                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
-            );
 
-            var transaction = _transactionService.CreateTransaction(userId, dto, out var error);
+            var transaction = _transactionRepository.GetTransactionById(transactionId);
+
+            _transactionService.ConfirmTransaction(_mapper.Map<TransactionDto>(transaction), out var error);
 
             if (transaction == null)
                 return BadRequest(error);
+
+
 
             var result = _mapper.Map<TransactionDto>(_transactionRepository.GetTransactionById(transaction.id));
 
@@ -72,7 +69,7 @@ namespace BankBackendApp.Controllers
         [ProducesResponseType(403)]
         public IActionResult CancelTransaction(int transactionId)
         {
-           
+
             var transaction = _transactionRepository.GetTransactionById(transactionId);
 
             _transactionService.CancelTransaction(_mapper.Map<TransactionDto>(transaction), out var error);
@@ -80,12 +77,11 @@ namespace BankBackendApp.Controllers
             if (transaction == null)
                 return BadRequest(error);
 
-            
+
 
             var result = _mapper.Map<TransactionDto>(_transactionRepository.GetTransactionById(transaction.id));
 
             return StatusCode(201, result);
         }
-
     }
 }

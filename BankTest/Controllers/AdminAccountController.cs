@@ -9,7 +9,7 @@ namespace BankBackendApp.Controllers
 {
     [Route("api/admin/accounts")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "Admin")]
     public class AdminAccountController : Controller
     {
         private readonly IAccountRepository _accountRepository;
@@ -26,6 +26,7 @@ namespace BankBackendApp.Controllers
             _accountService = accountService;
         }
 
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<AdminAccountDto>))]
         [ProducesResponseType(401)]
@@ -38,7 +39,7 @@ namespace BankBackendApp.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpDelete("{accountId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -60,7 +61,7 @@ namespace BankBackendApp.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPut("{accountId}/balance")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]

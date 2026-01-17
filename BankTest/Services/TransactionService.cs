@@ -56,6 +56,11 @@ namespace BankBackendApp.Services
                     return null;
                 }
 
+                fromAccount.balance -= dto.amount;
+                _context.account.Update(fromAccount);
+                _context.SaveChanges();
+
+
                 var signature = new Signature
                 {
                     signature = Convert.FromBase64String(dto.signature),
@@ -77,9 +82,10 @@ namespace BankBackendApp.Services
                     signature_id = signature.id
                 };
 
-            
 
 
+
+                
 
                 _context.transaction.Add(transaction);
                 _context.SaveChanges();
@@ -93,6 +99,69 @@ namespace BankBackendApp.Services
                 return null;
             }
         }
+        public Transaction CancelTransaction(TransactionDto transactionDto, out string error)
+        {
+            error = string.Empty;
 
+            using var dbTransaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                var fromAccount = _context.account.FirstOrDefault(a => a.id == transactionDto.account_from_id);
+                var transaction = _context.transaction.FirstOrDefault(t => t.id == transactionDto.id);
+
+                
+                fromAccount.balance += transactionDto.amount;
+                _context.account.Update(fromAccount);
+                _context.SaveChanges();
+
+                transaction.status_id = 3;
+                _context.transaction.Update(transaction);
+                _context.SaveChanges();
+
+                dbTransaction.Commit();
+                return transaction;
+
+            }
+            catch (Exception ex) 
+            {
+                dbTransaction.Rollback();
+                error= ex.Message;
+                return null;
+            }
+        }
+
+        public Transaction ConfirmTransaction(TransactionDto transactionDto, out string error)
+        {
+
+            error = string.Empty;
+
+            using var dbTransaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                var toAccount = _context.account.FirstOrDefault(a => a.id == transactionDto.account_to_id);
+                var transaction = _context.transaction.FirstOrDefault(t => t.id == transactionDto.id);
+
+
+                toAccount.balance += transactionDto.amount;
+                _context.account.Update(toAccount);
+                _context.SaveChanges();
+
+                transaction.status_id = 2;
+                _context.transaction.Update(transaction);
+                _context.SaveChanges();
+
+                dbTransaction.Commit();
+                return transaction;
+
+            }
+            catch (Exception ex)
+            {
+                dbTransaction.Rollback();
+                error = ex.Message;
+                return null;
+            }
+        }
     }
 }

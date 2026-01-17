@@ -8,7 +8,7 @@ namespace BankBackendApp.Controllers
 {
     [Route("api/admin/users")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "Admin")]
     public class AdminUserController : Controller
     {
         private readonly IUserRepository _userRepository;

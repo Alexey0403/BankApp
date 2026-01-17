@@ -17,6 +17,11 @@ namespace BankBackendApp.Repositories
         public ICollection<Transaction> GetTransactions()
         {
             return _context.transaction
+                .Include(t => t.AccountFrom)
+                    .ThenInclude(af => af.Currency)
+                .Include(t => t.AccountTo)
+                    .ThenInclude(at => at.Currency)
+                .Include(t => t.Status)
                 .OrderBy(u => u.id)
                 .ToList();
         }
