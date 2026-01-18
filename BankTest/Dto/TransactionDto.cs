@@ -16,5 +16,6 @@
         public AccountDto AccountTo { get; set;}
 
         public TransactionStatusDto Status { get; set; }
+        public SignatureDto Signature { get; set; }
     }
 }

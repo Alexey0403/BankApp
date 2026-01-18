@@ -65,6 +65,9 @@ namespace BankBackendApp.Helpers
 
             //TRANSACTIONSTATUS
             CreateMap<TransactionStatus, TransactionStatusDto>();
+
+            //SIGNATURE
+            CreateMap<Signature,  SignatureDto>();
         }
     }
 }

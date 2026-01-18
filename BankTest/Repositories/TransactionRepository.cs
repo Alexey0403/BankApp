@@ -25,6 +25,7 @@ namespace BankBackendApp.Repositories
                 .Include(t => t.AccountTo)
                     .ThenInclude(at => at.Currency)
                 .Include(t => t.Status)
+                .Include(t => t.Signature)
                 .OrderBy(u => u.id)
                 .ToList(); ;
             }
@@ -36,6 +37,7 @@ namespace BankBackendApp.Repositories
                 .Include(t => t.AccountTo)
                     .ThenInclude(at => at.Currency)
                 .Include(t => t.Status)
+                .Include(t => t.Signature)
                 .Where(t => t.status_id == statusId.Value)
                 .OrderBy(u => u.id)
                 .ToList();
@@ -53,6 +55,7 @@ namespace BankBackendApp.Repositories
                 .Include(t => t.AccountTo)
                     .ThenInclude(at => at.Currency)
                 .Include(t => t.Status)
+                .Include(t => t.Signature)
                 .Where(t =>
                     _context.account.Any(a =>
                         a.user_id == userId &&
@@ -71,6 +74,7 @@ namespace BankBackendApp.Repositories
                 .Include(t => t.AccountTo)
                     .ThenInclude(at => at.Currency)
                 .Include(t => t.Status)
+                .Include(t => t.Signature)
                 .FirstOrDefault(t => t.id == id);
 
         }
