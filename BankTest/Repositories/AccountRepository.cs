@@ -14,13 +14,27 @@ namespace BankBackendApp.Repositories
             _context = context;
         }
 
-        public ICollection<Account> GetAccounts()
+        public ICollection<Account> GetAccounts(bool? status)
         {
-            return _context.account
+            if (!status.HasValue)
+            {
+                return _context.account
                 .Include(a => a.Currency)
                 .Include(a => a.Cards)
                 .OrderBy(a => a.id)
                 .ToList();
+            }
+            else
+            {
+                return _context.account
+                .Include(a => a.Currency)
+                .Include(a => a.Cards)
+                .Where(a => a.is_active == status.Value)
+                .OrderBy(a => a.id)
+                .ToList();
+
+            }
+            
         }
 
         public ICollection<Account> GetAccountsByUser(int userId)

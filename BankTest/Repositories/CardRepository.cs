@@ -14,13 +14,42 @@ namespace BankBackendApp.Repositories
             _context = context;
         }
 
-        public ICollection<Card> GetCards()
+        public ICollection<Card> GetCards(bool? status, string? number)
         {
-            return _context.card
+            if (!status.HasValue && number == null)
+            {
+                return _context.card
                 .Include(c => c.Currency)
                 .Include(c => c.CardProvider)
                 .OrderBy(u => u.id)
                 .ToList();
+            }
+            else if (status.HasValue && number == null) 
+            {
+                return _context.card
+                .Include(c => c.Currency)
+                .Include(c => c.CardProvider)
+                .Where(c => c.is_active == status.Value)
+                .OrderBy(u => u.id)
+                .ToList();
+            } else if (!status.HasValue && number != null) 
+            {
+                return _context.card
+                .Include(c => c.Currency)
+                .Include(c => c.CardProvider)
+                .Where(a => a.Account.number == number)
+                .OrderBy(u => u.id)
+                .ToList();
+            } else
+            {
+                return _context.card
+                .Include(c => c.Currency)
+                .Include(c => c.CardProvider)
+                .Where(a => a.Account.number == number)
+                .Where(a => a.is_active == status.Value)
+                .OrderBy(u => u.id)
+                .ToList();
+            }
         }
 
         public ICollection<Card> GetCardsByAccount(int accountId)
@@ -50,6 +79,12 @@ namespace BankBackendApp.Repositories
         public bool UpdateCard(Card card)
         {
             _context.card.Update(card);
+            return Save();
+        }
+
+        public bool DeleteCard(Card card)
+        {
+            _context.card.Remove(card);
             return Save();
         }
 

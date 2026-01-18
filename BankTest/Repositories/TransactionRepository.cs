@@ -14,16 +14,35 @@ namespace BankBackendApp.Repositories
             _context = context;
         }
 
-        public ICollection<Transaction> GetTransactions()
+        public ICollection<Transaction> GetTransactions(int? statusId)
         {
-            return _context.transaction
+          
+            if (!statusId.HasValue) 
+            {
+                return _context.transaction
                 .Include(t => t.AccountFrom)
                     .ThenInclude(af => af.Currency)
                 .Include(t => t.AccountTo)
                     .ThenInclude(at => at.Currency)
                 .Include(t => t.Status)
                 .OrderBy(u => u.id)
+                .ToList(); ;
+            }
+            else
+            {
+                return _context.transaction
+                .Include(t => t.AccountFrom)
+                    .ThenInclude(af => af.Currency)
+                .Include(t => t.AccountTo)
+                    .ThenInclude(at => at.Currency)
+                .Include(t => t.Status)
+                .Where(t => t.status_id == statusId.Value)
+                .OrderBy(u => u.id)
                 .ToList();
+            }
+            
+            
+
         }
 
         public ICollection<Transaction> GetTransactionsByUser(int userId)

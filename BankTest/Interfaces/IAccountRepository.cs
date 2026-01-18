@@ -4,7 +4,7 @@ namespace BankBackendApp.Interfaces
 {
     public interface IAccountRepository
     {
-        ICollection<Account> GetAccounts();
+        ICollection<Account> GetAccounts(bool? status);
         ICollection<Account> GetAccountsByUser(int userId);
 
         Account GetAccount(int id);

@@ -4,7 +4,7 @@ namespace BankBackendApp.Interfaces
 {
     public interface ITransactionRepository
     {
-        ICollection<Transaction> GetTransactions();
+        ICollection<Transaction> GetTransactions(int? transactionId);
 
         ICollection<Transaction> GetTransactionsByUser(int userId);
         Transaction GetTransactionById(int transactionId);

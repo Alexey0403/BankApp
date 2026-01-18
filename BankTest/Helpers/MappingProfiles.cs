@@ -34,6 +34,8 @@ namespace BankBackendApp.Helpers
             
             CreateMap<Account, AccountDto>();
 
+            CreateMap<Account, AdminAccountDto>();
+
             //CARD
             CreateMap<Card, CardDto>();
 
@@ -44,6 +46,8 @@ namespace BankBackendApp.Helpers
                 .ForMember(dest => dest.created_at, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.is_active, opt => opt.MapFrom(_ => true));
             CreateMap<Card, OutCardDto>();
+
+            CreateMap<Card, AdminCardDto>();
             //DEPOSIT
             CreateMap<Deposit, DepositDto>();
 

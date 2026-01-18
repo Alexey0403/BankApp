@@ -31,9 +31,9 @@ namespace BankBackendApp.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<AdminAccountDto>))]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
-        public IActionResult GetAccounts()
+        public IActionResult GetAccounts([FromQuery] bool? status)
         {
-            var accounts = _accountRepository.GetAccounts();
+            var accounts = _accountRepository.GetAccounts(status);
 
             var result = _mapper.Map<IEnumerable<AdminAccountDto>>(accounts);
             return Ok(result);

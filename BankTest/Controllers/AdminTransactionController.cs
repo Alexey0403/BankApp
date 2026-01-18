@@ -30,9 +30,9 @@ namespace BankBackendApp.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<TransactionDto>))]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
-        public IActionResult GetTransactions()
+        public IActionResult GetTransactions([FromQuery] int? statusId)
         {
-            var transactions = _transactionRepository.GetTransactions();
+            var transactions = _transactionRepository.GetTransactions(statusId);
 
             var result = _mapper.Map<IEnumerable<TransactionDto>>(transactions);
             return Ok(result);

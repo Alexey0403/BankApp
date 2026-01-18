@@ -34,7 +34,7 @@ namespace BankBackendApp.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPut("{userId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
