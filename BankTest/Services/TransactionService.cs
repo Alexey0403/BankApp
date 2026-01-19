@@ -56,6 +56,12 @@ namespace BankBackendApp.Services
                     return null;
                 }
 
+                if (dto.amount <= 0)
+                {
+                    error = "Invalid amount";
+                    return null;
+                }
+
                 fromAccount.balance -= dto.amount;
                 _context.account.Update(fromAccount);
                 _context.SaveChanges();
