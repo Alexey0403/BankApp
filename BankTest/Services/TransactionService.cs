@@ -3,6 +3,7 @@ using BankBackendApp.Dto;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
 using BankBackendApp.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankBackendApp.Services
 {
@@ -24,7 +25,7 @@ namespace BankBackendApp.Services
             try
             {
 
-                var fromAccount = _context.account.FirstOrDefault(a => a.number == dto.number_account_from);
+                var fromAccount = _context.account.Include(a => a.User).Where(a => a.User.id == a.user_id).FirstOrDefault(a => a.number == dto.number_account_from);
                 if (fromAccount == null)
                 {
                     error = "Sender account not found";
@@ -37,10 +38,16 @@ namespace BankBackendApp.Services
                     return null;
                 }
 
-                var toAccount = _context.account.FirstOrDefault(a => a.number == dto.number_account_to);
+                var toAccount = _context.account.Include(a => a.User).Where(a => a.User.id == a.user_id).FirstOrDefault(a => a.number == dto.number_account_to);
                 if (toAccount == null)
                 {
                     error = "Recipient account not found";
+                    return null;
+                }
+
+                if (toAccount.User.name != dto.recipients_name || toAccount.User.surname != dto.recipients_surname)
+                {
+                    error = "Recipient name or surname do not match";
                     return null;
                 }
 
