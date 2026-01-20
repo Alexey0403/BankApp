@@ -2,6 +2,7 @@
 using BankBackendApp.Dto;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
+using BankBackendApp.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,15 +13,19 @@ namespace BankBackendApp.Controllers
     [ApiController]
     public class AccountController : Controller
     {
+        private readonly ICardRepository _cardRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly IAccountService _accountService;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public AccountController(IAccountRepository accountRepository, IMapper mapper, IAccountService accountService)
+        public AccountController(IAccountRepository accountRepository, ITransactionRepository transactionRepository, ICardRepository cardRepository, IMapper mapper, IAccountService accountService)
         {
+            _cardRepository = cardRepository;
             _accountRepository = accountRepository;
             _mapper = mapper;
             _accountService = accountService;
+            _transactionRepository = transactionRepository;
         }
         [Authorize]
         [HttpGet("user/myaccounts")]
@@ -91,6 +96,7 @@ namespace BankBackendApp.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var account = _accountRepository.GetAccount(accountId);
+            var transactions = _transactionRepository.GetTransactionsByAccount(accountId);
 
             if (account == null)
                 return NotFound();
@@ -101,7 +107,17 @@ namespace BankBackendApp.Controllers
             if (!account.is_active)
                 return NoContent();
 
+            foreach (var transaction in transactions)
+                if (transaction.status_id == 1) return StatusCode(401, "There is active transactions that can not close this account");
+
             account.is_active = false;
+
+
+            foreach(var card in account.Cards)
+            {
+                card.is_active = false;
+            }
+                
 
             if (!_accountRepository.UpdateAccount(account))
                 return StatusCode(500, "Error while closing account");

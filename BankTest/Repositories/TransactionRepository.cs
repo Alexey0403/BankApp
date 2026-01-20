@@ -66,6 +66,21 @@ namespace BankBackendApp.Repositories
                 .ToList();
         }
 
+        public ICollection<Transaction> GetTransactionsByAccount(int accountId)
+        {
+            return _context.transaction
+                .Include(t => t.AccountFrom)
+                    .ThenInclude(af => af.Currency)
+                .Include(t => t.AccountTo)
+                    .ThenInclude(at => at.Currency)
+                .Include(t => t.Status)
+                .Include(t => t.Signature)
+                .Where(t => t.AccountFrom.id == accountId)
+                .OrderByDescending(t => t.created_at)
+                .ToList();
+        }
+
+
         public Transaction GetTransactionById(int id) {
 
             return _context.transaction

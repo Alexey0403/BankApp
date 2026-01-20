@@ -7,6 +7,7 @@ namespace BankBackendApp.Interfaces
         ICollection<Account> GetAccounts(bool? status);
         ICollection<Account> GetAccountsByUser(int userId);
 
+        
         Account GetAccount(int id);
         bool CreateAccount(Account account);
         bool UpdateAccount(Account account);

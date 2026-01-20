@@ -7,6 +7,7 @@ namespace BankBackendApp.Interfaces
         ICollection<Transaction> GetTransactions(int? transactionId);
 
         ICollection<Transaction> GetTransactionsByUser(int userId);
+        ICollection<Transaction> GetTransactionsByAccount(int accountId);
         Transaction GetTransactionById(int transactionId);
     }
 }

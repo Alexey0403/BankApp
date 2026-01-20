@@ -47,6 +47,7 @@ namespace BankBackendApp.Repositories
                 .ToList();
         }
 
+        
         public Account GetAccount(int id)
         {
             return _context.account
