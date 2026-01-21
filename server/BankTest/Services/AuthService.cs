@@ -21,27 +21,27 @@ namespace BankBackendApp.Services
             _jwtService = jwtService;
         }
 
-        public bool Register(RegisterDto dto, out string error)
+        public AuthResponseDto Register(RegisterDto dto, out string error)
         {
             error = string.Empty;
 
             if (dto == null)
             {
                 error = "Invalid data";
-                return false;
+                return null;
             }
 
             if (string.IsNullOrWhiteSpace(dto.gmail) || string.IsNullOrWhiteSpace(dto.password))
             {
                 error = "Gmail and password are required";
-                return false;
+                return null;
             }
 
             bool exists = _context.user.Any(u => u.gmail == dto.gmail);
             if (exists)
             {
                 error = "User already exists";
-                return false;
+                return null;
             }
 
             var user = new User
@@ -59,7 +59,14 @@ namespace BankBackendApp.Services
             _context.user.Add(user);
             _context.SaveChanges();
 
-            return true;
+            var token = _jwtService.GenerateToken(user);
+
+            return new AuthResponseDto
+            {
+                token = token,
+                user_id = user.id,
+                role_id = user.role_id
+            };
         }
 
         public AuthResponseDto Login(LoginDto dto, out string error)

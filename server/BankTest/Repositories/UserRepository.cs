@@ -1,6 +1,7 @@
 ﻿using BankBackendApp.Data;
 using BankBackendApp.Interfaces;
 using BankBackendApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankBackendApp.Repositories
 {
@@ -23,6 +24,7 @@ namespace BankBackendApp.Repositories
         public User GetUser(int id)
         {
             return _context.user
+                .Include(u => u.Role)
                 .FirstOrDefault(u => u.id == id);
         }
 

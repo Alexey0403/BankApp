@@ -68,6 +68,9 @@ namespace BankBackendApp.Helpers
 
             //SIGNATURE
             CreateMap<Signature,  SignatureDto>();
+
+            //ROLE
+            CreateMap<Role, RoleDto>();
         }
     }
 }

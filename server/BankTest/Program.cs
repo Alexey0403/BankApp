@@ -60,6 +60,16 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim(ClaimTypes.Role, "1"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Replace with your frontend URL
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 // Generate JSON OpenAPI
 builder.Services.AddOpenApi();
@@ -129,6 +139,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors();
 app.MapControllers();
 
 app.Run();

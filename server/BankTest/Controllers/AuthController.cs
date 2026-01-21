@@ -19,10 +19,14 @@ namespace BankBackendApp.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterDto dto)
         {
-            if (!_authService.Register(dto, out var error))
+            var result = _authService.Register(dto, out var error);
+
+            if (result == null)
                 return BadRequest(error);
 
-            return StatusCode(201);
+
+
+            return Ok(result);
         }
 
         [HttpPost("login")]
