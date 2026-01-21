@@ -19,6 +19,11 @@ export const TransactionList: React.FC = () => {
             try {
                 const resp = await apiFetch('/Transaction/mytransactions');
 
+                if (!resp.ok) {
+                    const errMessage = await resp.text();
+                    throw new Error(errMessage);
+                };
+
                 const transactionResp = await resp.json();
 
                 setTransactions(transactionResp);

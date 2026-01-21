@@ -56,6 +56,11 @@ export const Accounts: React.FC = () => {
                 })
             });
 
+            if (!res.ok) {
+                const errMessage = await res.text();
+                throw new Error(errMessage);
+            };
+
             const newAccount = await res.json();
 
             setAccountsList(prev => [newAccount, ...prev]);

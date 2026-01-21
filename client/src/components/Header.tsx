@@ -5,6 +5,8 @@ import { logout } from "@/services/auth/auth.service";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "./auth/AuthContext";
+import { useEffect, useState } from "react";
 
 interface IHeaderProps {
     hideNavMenu?: boolean;
@@ -13,12 +15,26 @@ interface IHeaderProps {
 export const Header: React.FC<IHeaderProps> = ({ hideNavMenu = false }) => {
     const router = useRouter();
     const pathname = usePathname();
+    const { user } = useAuth();
+    const [menuItems, setMenuItems] = useState(navItems);
 
     const handleLogoClick = () => router.push("/");
 
     const handleLogOutClick = () => logout();
 
     const isActive = (href: string) => pathname === href;
+
+    useEffect(() => {
+        if (user?.role_id === 1) {
+            setMenuItems(prev => [
+                ...prev,
+                {
+                    label: 'Requests',
+                    link: '/requests'
+                },
+            ]);
+        };
+    }, [user]);
 
     return (
         <header>
@@ -43,7 +59,7 @@ export const Header: React.FC<IHeaderProps> = ({ hideNavMenu = false }) => {
             </div>
             { !hideNavMenu && (
                 <div className="container text-[18px]/[140%] font-medium py-6 flex items-center gap-10">
-                    {navItems.map(ni => (
+                    {menuItems.map(ni => (
                         <Link
                             key={ni.link}
                             href={ni.link}  

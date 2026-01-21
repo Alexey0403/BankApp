@@ -28,6 +28,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
 
             if (pathname === '/register') return;
+
+            if (pathname === '/requests' && user?.role_id !== 1) {
+                router.push('/404');
+            };
             
             const link = pathname === '/login' || pathname === '/'
                 ? '/login' 

@@ -20,8 +20,6 @@ export const TransactionInfoModal: React.FC<ITransactionInfoModalProps> = ({ onC
         };
     }, []);
 
-    console.log(transaction);
-
     return (
         <div
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"

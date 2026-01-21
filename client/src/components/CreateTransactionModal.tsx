@@ -72,6 +72,11 @@ export const CreateTransactionModal: React.FC<ICreateTransactionModalProps> = ({
                 })
             });
 
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
             const newTransaction = await resp.json();
             onCreate(newTransaction);
             

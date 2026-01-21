@@ -4,6 +4,8 @@ import { navItems } from "@/data/menu";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAuth } from "./auth/AuthContext";
 
 interface IFooterProps {
     hideNavMenu?: boolean;
@@ -12,10 +14,24 @@ interface IFooterProps {
 export const Footer: React.FC<IFooterProps> = ({ hideNavMenu = false }) => {
     const router = useRouter();
     const pathname = usePathname();
+    const [menuItems, setMenuItems] = useState(navItems);
+    const { user } = useAuth();
 
     const isActive = (href: string) => pathname === href;
 
     const handleLogoClick = () => router.push("/");
+
+    useEffect(() => {
+        if (user?.role_id === 1) {
+            setMenuItems(prev => [
+                ...prev,
+                {
+                    label: 'Requests',
+                    link: '/requests'
+                },
+            ]);
+        };
+    }, [user]);
 
     return (
         <footer className="bg-gray-100">
@@ -29,7 +45,7 @@ export const Footer: React.FC<IFooterProps> = ({ hideNavMenu = false }) => {
                         onClick={handleLogoClick}
                         className={`${pathname !== "/" && 'cursor-pointer'}`}
                     />
-                    {navItems.map(ni => (
+                    {menuItems.map(ni => (
                         <Link
                             key={ni.link}
                             href={ni.link}  

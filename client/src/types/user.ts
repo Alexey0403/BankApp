@@ -6,4 +6,5 @@ export interface IUser {
     phone_number: string;
     surname: string;
     publickey?: string;
+    role_id: number;
 };

@@ -20,12 +20,12 @@ export async function login(login: string, password: string) {
 }
 
 export async function register(data: {
-  name: string;
-  surname: string;
-  birthday: string;
-  phone_number: string;
-  gmail: string;
-  password: string;
+    name: string;
+    surname: string;
+    birthday: string;
+    phone_number: string;
+    gmail: string;
+    password: string;
 }) {
     const res = await apiFetch('/Auth/register', {
         method: 'POST',

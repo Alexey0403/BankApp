@@ -12,14 +12,16 @@ import { ConfirmDialog } from "./ConfirmDialog";
 
 interface ITransactionProps {
     transaction: ITransaction;
-    onCancel: (id: number) => void;
+    onCancel?: (id: number) => void;
+    isAdmin?: boolean;
 };
 
-export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel }) => {
+export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel, isAdmin = false }) => {
     const [isFullInfoOpen, setIsFullInfoOpen] = useState(false);
     const [isSignatureVerifyOpen, setIsSignatureVerifyOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isApproveOpen, setIsApproveOpen] = useState(false);
     const menuWrapperRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -46,8 +48,34 @@ export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel
             await apiFetch(`/Transaction/canceltransaction?transactionId=${transaction.id}`, {
                 method: 'PUT',
             });
-            onCancel(transaction.id);
-            toast.success("You've successfully canceled transaction!");
+            if (onCancel) {
+                onCancel(transaction.id);
+                toast.success("You've successfully canceled transaction!");
+            };
+        } catch (err) {
+            if (err instanceof Error) {
+                toast.error(err.message);
+            };
+        };
+    };
+
+    const handleAdminCancelTransaction = async () => {
+        try {
+            const resp = await apiFetch(`/admin/transactions/canceltransaction?transactionId=${transaction.id}`, { method: 'PUT' });
+
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
+            if (resp.status !== 401) {
+                if (onCancel) {
+                    onCancel(transaction.id);
+                    toast.success("You've successfully deleted transaction!");
+                };
+            } else {
+                throw new Error('Unauthorized');
+            };
         } catch (err) {
             if (err instanceof Error) {
                 toast.error(err.message);
@@ -58,6 +86,30 @@ export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel
     const handleCancelTransactionModal = () => {
         setIsConfirmOpen(false);
         handleCancelTransaction();
+    };
+
+    const handleApproveTransaction = async () => {
+        try {
+            const resp = await apiFetch(`/admin/transactions/confirmtransaction?transactionId=${transaction.id}`, { method: 'PUT' });
+
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
+            if (resp.status !== 401) {
+                if (onCancel) {
+                    onCancel(transaction.id);
+                    toast.success("You've successfully approved transaction!");
+                };
+            } else {
+                throw new Error('Unauthorized');
+            };
+        } catch (err) {
+            if (err instanceof Error) {
+                toast.error(err.message);
+            };
+        };
     };
 
     return (
@@ -116,15 +168,19 @@ export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel
                                 >
                                     Full Transaction info
                                 </button>
-                                <button
-                                    className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer"
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        setIsSignatureVerifyOpen(true);
-                                    }}
-                                >
-                                    Check with public key
-                                </button>
+                                {
+                                    !isAdmin && (
+                                        <button
+                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer"
+                                            onClick={() => {
+                                                setIsMenuOpen(false);
+                                                setIsSignatureVerifyOpen(true);
+                                            }}
+                                        >
+                                            Check with public key
+                                        </button>
+                                    )
+                                }
                                 {
                                     transaction.status.status === "PENDING" && (
                                         <button
@@ -135,6 +191,19 @@ export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel
                                             }}
                                         >
                                             Cancel Transaction
+                                        </button>
+                                    )
+                                }
+                                {
+                                    transaction.status.status === "PENDING" && isAdmin && (
+                                        <button
+                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer text-green-600"
+                                            onClick={() => {
+                                                setIsMenuOpen(false);
+                                                setIsApproveOpen(true);
+                                            }}
+                                        >
+                                            Approve Transaction
                                         </button>
                                     )
                                 }
@@ -161,8 +230,16 @@ export const Transaction: React.FC<ITransactionProps> = ({ transaction, onCancel
             {isConfirmOpen && (
                 <ConfirmDialog
                     message="Are you sure you want to cancel transaction?"
-                    onConfirm={handleCancelTransactionModal}
+                    onConfirm={isAdmin ? handleAdminCancelTransaction : handleCancelTransactionModal}
                     onCancel={() => setIsConfirmOpen(false)}
+                />
+            )}
+
+            {isApproveOpen && (
+                <ConfirmDialog
+                    message="Are you sure you want to approve transaction?"
+                    onConfirm={handleApproveTransaction}
+                    onCancel={() => setIsApproveOpen(false)}
                 />
             )}
         </div>

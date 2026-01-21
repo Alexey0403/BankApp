@@ -14,9 +14,11 @@ import { apiFetch } from "@/lib/api";
 
 interface IAccountProps {
     account: IAccount;
+    isAdmin?: boolean;
+    handleDelete?: (id: number) => void;
 };
 
-export const Account: React.FC<IAccountProps> = ({ account }) => {
+export const Account: React.FC<IAccountProps> = ({ account, isAdmin = false, handleDelete }) => {
     const { number, currency, cards, balance, is_active } = account;
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,6 +65,11 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
                 })
             });
 
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
             const newCard = await resp.json();
 
             setAccountCards(prev => [newCard, ...prev]);
@@ -80,13 +87,17 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
         try {
             const resp = await apiFetch(`/Account/${account.id}/close`, { method: 'PUT' });
 
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
             if (resp.status !== 401) {
                 setAccountIsActive(prev => !prev);
                 setAccountCards(prev => prev.map(c => ({
                     ...c,
                     is_active: false
                 })));
-                console.log(accountCards)
                 setIsConfirmOpen(false);
                 toast.success("You've successfully deactivated your account!");
             } else {
@@ -103,6 +114,11 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
         try {
             const resp = await apiFetch(`/Account/${account.id}/reopen`, { method: 'PUT' });
 
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
             if (resp.status !== 401) {
                 setAccountIsActive(prev => !prev);
                 setIsConfirmOpen(false);
@@ -115,6 +131,31 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
                 toast.error(err.message);
             };
         };  
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            const resp = await apiFetch(`/admin/accounts/${account.id}`, { method: 'DELETE' });
+
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
+            if (resp.status !== 401) {
+                if (handleDelete) {
+                    handleDelete(account.id);
+                    setIsConfirmOpen(false);
+                    toast.success("You've successfully deleted the account!");
+                };
+            } else {
+                throw new Error('Unauthorized');
+            };;
+        } catch (err) {
+            if (err instanceof Error) {
+                toast.error(err.message);
+            };
+        };
     };
 
     return (
@@ -162,46 +203,64 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
                         />
     
                         {isMenuOpen && (
-                            <div
-                                className="absolute top-21 right-5 w-50 bg-white text-gray-900 rounded-md shadow-lg overflow-hidden z-20"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {accountIsActive && (
-                                    <div>
-                                        <button
-                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer"
-                                            onClick={() => {
-                                                setIsMenuOpen(false);
-                                                copyToClipboard(
-                                                    number, 
-                                                    "The account number has been successfully copied to the clipboard!",
-                                                    "An error occurred while copying the account number!"
-                                                );
-                                            }}
-                                        >
-                                            Copy account number
-                                        </button>
-                                        <button
-                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer"
-                                            onClick={() => {
-                                                setIsMenuOpen(false);
-                                                setIsCreateCardOpen(true);
-                                            }}
-                                        >
-                                            Create new card
-                                        </button>
-                                    </div>
-                                )}
-                                <button
-                                    className={`w-full px-4 py-2 text-left ${accountIsActive ? "text-red-600 hover:bg-red-50" : "text-green-600 hover:text-green-50"} transition cursor-pointer`}
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        setIsConfirmOpen(true);
-                                    }}
+                            isAdmin ? (
+                                <div
+                                    className="absolute top-21 right-5 w-50 bg-white text-gray-900 rounded-md shadow-lg overflow-hidden z-20"
+                                    onClick={(e) => e.stopPropagation()}
                                 >
-                                    {accountIsActive ? 'Deactivate account' : 'Reactivate account'}
-                                </button>
-                            </div>
+                                    <button
+                                        className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer text-red-600 hover:bg-red-50"
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            setIsConfirmOpen(true);
+                                        }}
+                                    >
+                                        Delete account
+                                    </button>
+                                </div>
+                            ) : (
+                                <div
+                                    className="absolute top-21 right-5 w-50 bg-white text-gray-900 rounded-md shadow-lg overflow-hidden z-20"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {accountIsActive && (
+                                        <div>
+                                            <button
+                                                className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer"
+                                                onClick={() => {
+                                                    setIsMenuOpen(false);
+                                                    copyToClipboard(
+                                                        number, 
+                                                        "The account number has been successfully copied to the clipboard!",
+                                                        "An error occurred while copying the account number!"
+                                                    );
+                                                }}
+                                            >
+                                                Copy account number
+                                            </button>
+                                            <button
+                                                className="w-full px-4 py-2 text-left hover:bg-gray-100 transition cursor-pointer"
+                                                onClick={() => {
+                                                    setIsMenuOpen(false);
+                                                    setIsCreateCardOpen(true);
+                                                }}
+                                            >
+                                                Create new card
+                                            </button>
+                                        </div>
+                                    )}
+                                    <button
+                                        className={`w-full px-4 py-2 text-left ${accountIsActive ? "text-red-600 hover:bg-red-50" : "text-green-600"} transition cursor-pointer`}
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            setIsConfirmOpen(true);
+                                        }}
+                                    >
+                                        {accountIsActive ? 'Deactivate account' : 'Reactivate account'}
+                                    </button>
+                                </div>
+                            )
+
                         )}
                     </div>
                 </div>
@@ -213,6 +272,8 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
                             key={card.number}
                             card={card}
                             acc_is_active={accountIsActive}
+                            isAdmin={isAdmin}
+                            handleDelete={(id: number) => setAccountCards(prev => prev.filter(c => c.id !== id))}
                         />
                     ))}
                 </div>
@@ -220,8 +281,8 @@ export const Account: React.FC<IAccountProps> = ({ account }) => {
 
             {isConfirmOpen && (
                 <ConfirmDialog
-                    message={accountIsActive ? "Are you sure you want to deactivate the account?" : "Are you sure you want to reactivate the account?"}
-                    onConfirm={accountIsActive ? handleDeactiveAccount : handleReactivateAccount}
+                    message={isAdmin ? "Are you sure you want to delete the account?" : accountIsActive ? "Are you sure you want to deactivate the account?" : "Are you sure you want to reactivate the account?"}
+                    onConfirm={isAdmin ? handleDeleteAccount : accountIsActive ? handleDeactiveAccount : handleReactivateAccount}
                     onCancel={() => setIsConfirmOpen(false)}
                 />
             )}

@@ -13,9 +13,11 @@ import { apiFetch } from "@/lib/api";
 interface ICardProps {
     card: ICard;
     acc_is_active: boolean;
+    isAdmin?: boolean;
+    handleDelete?: (id: number) => void;
 };
 
-export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
+export const Card: React.FC<ICardProps> = ({ card, acc_is_active, isAdmin = false, handleDelete }) => {
     const { number, month, year, cvv, card_provider_id, is_active } = card;
 
     const [isNumberShown, setIsNumberShown] = useState(false);
@@ -74,6 +76,11 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
         try {
             const resp = await apiFetch(`/Card/${card.id}/close`, { method: 'PUT' });
 
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
             if (resp.status !== 401) {
                 setCardIsActive(prev => !prev);
                 setIsConfirmOpen(false);
@@ -91,6 +98,11 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
     const handleReactivateCard = async () => {
         try {
             const resp = await apiFetch(`/Card/${card.id}/reopen`, { method: 'PUT' });
+
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
 
             if (resp.status !== 401) {
                 setCardIsActive(prev => !prev);
@@ -123,6 +135,31 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
         setCardIsActive(card.is_active);
     }, [card.is_active]);
 
+    const handleDeleteCard = async () => {
+        try {
+            const resp = await apiFetch(`/admin/cards/${card.id}`, { method: 'DELETE' });
+
+            if (!resp.ok) {
+                const errMessage = await resp.text();
+                throw new Error(errMessage);
+            };
+
+            if (resp.status !== 401) {
+                if (handleDelete) {
+                    handleDelete(card.id);
+                    setIsConfirmOpen(false);
+                    toast.success("You've successfully deleted the card!");
+                };
+            } else {
+                throw new Error('Unauthorized');
+            };
+        } catch (err) {
+            if (err instanceof Error) {
+                toast.error(err.message);
+            };
+        }
+    };
+
     return (
         <div className="relative flex flex-col gap-8 max-w-fit bg-gradient-to-br from-[#001f4d] to-[#3fa9f5] text-white rounded-md p-4 snap-start shrink-0">
             <div className="flex items-center justify-between">
@@ -134,7 +171,7 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
                         alt="Logo"
                     />
                 </div>
-                { acc_is_active && (
+                { (acc_is_active || isAdmin) && (
                     <div
                         onClick={toggleOptionsMenu}
                         ref={menuWrapperRef}
@@ -172,13 +209,13 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
                                 }
 
                                 <button
-                                    className={`w-full px-4 py-2 text-left ${cardIsActive ? "text-red-600 hover:bg-red-50" : "text-green-600 hover:bg-green-50"} transition cursor-pointer`}
+                                    className={`w-full px-4 py-2 text-left ${cardIsActive || isAdmin ? "text-red-600 hover:bg-red-50" : "text-green-600 hover:bg-green-50"} transition cursor-pointer`}
                                     onClick={() => {
                                         setIsMenuOpen(false);
                                         setIsConfirmOpen(true);
                                     }}
                                 >
-                                    {cardIsActive ? 'Deactivate card' : 'Reactivate card'}
+                                    {isAdmin ? 'Delete card' : cardIsActive ? 'Deactivate card' : 'Reactivate card'}
                                 </button>
                             </div>
                         )}
@@ -186,8 +223,8 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
                 )}
             </div>
             <div 
-                className="px-20 cursor-pointer flex items-center gap-4 font-medium"
-                onClick={toggleCardNumberVisibility}
+                className={`px-20 ${cardIsActive ? 'cursor-pointer' : 'cursor-not-allowed'} flex items-center gap-4 font-medium`}
+                onClick={cardIsActive ? toggleCardNumberVisibility : () => {}}
             >
                 {cardIsActive ? chunks.map((c, index) => (
                     <p 
@@ -218,8 +255,8 @@ export const Card: React.FC<ICardProps> = ({ card, acc_is_active }) => {
 
             {isConfirmOpen && (
                 <ConfirmDialog
-                    message={cardIsActive ? "Are you sure you want to deactivate the card?" : "Are you sure you want to reactivate the card?"}
-                    onConfirm={cardIsActive ? handleDeactivateCard : handleReactivateCard}
+                    message={isAdmin ? "Are you sure you want to delete the card?" : cardIsActive ? "Are you sure you want to deactivate the card?" : "Are you sure you want to reactivate the card?"}
+                    onConfirm={isAdmin ? handleDeleteCard : cardIsActive ? handleDeactivateCard : handleReactivateCard}
                     onCancel={() => setIsConfirmOpen(false)}
                 />
             )}
