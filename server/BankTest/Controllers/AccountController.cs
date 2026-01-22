@@ -108,7 +108,7 @@ namespace BankBackendApp.Controllers
                 return NoContent();
 
             foreach (var transaction in transactions)
-                if (transaction.status_id == 1) return StatusCode(401, "There is active transactions that can not close this account");
+                if (transaction.status_id == 1) return StatusCode(400, "There is active transactions that can not close this account");
 
             account.is_active = false;
 

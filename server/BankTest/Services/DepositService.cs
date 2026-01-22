@@ -24,7 +24,7 @@ namespace BankBackendApp.Services
             try
             {
                 var account = _context.account
-                    .FirstOrDefault(a => a.id == dto.account_id && a.user_id == user_id);
+                    .FirstOrDefault(a => a.number == dto.number && a.user_id == user_id);
 
                 if (account == null || account.user_id != user_id)
                 {
@@ -34,15 +34,21 @@ namespace BankBackendApp.Services
 
 
 
-                if (account.currency_id != dto.currency_id)
-                {
-                    error = "Account currency mismatch";
-                    return null;
-                }
+                //if (account.currency_id != dto.currency_id)
+                //{
+                //    error = "Account currency mismatch";
+                //    return null;
+                //}
 
                 if (account.balance < dto.amount)
                 {
                     error = "Insufficient funds";
+                    return null;
+                }
+
+                if (dto.amount <= 0)
+                {
+                    error = "Invalid amount";
                     return null;
                 }
 
@@ -65,7 +71,7 @@ namespace BankBackendApp.Services
                 {
                     user_id = user_id,
                     deposit_type_id = dto.deposit_type_id,
-                    currency_id = dto.currency_id,
+                    currency_id = account.currency_id,
                     amount = dto.amount,
                     interest_rate = depositType.interest_rate,
                     start_date = DateTime.UtcNow,
