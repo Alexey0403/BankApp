@@ -2,7 +2,7 @@
 {
     public class AddMoneyToDepositDto
     {
-        public int account_id { get; set; }
+        public string number { get; set; }
         public decimal amount { get; set; }
     }
 }

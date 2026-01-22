@@ -42,9 +42,6 @@ namespace BankBackendApp.Controllers
 
             var accounts = _accountRepository.GetAccountsByUser(userId);
 
-            if (accounts == null || !accounts.Any())
-                return NotFound();
-
             var result = _mapper.Map<IEnumerable<AccountDto>>(accounts);
 
             return Ok(result);

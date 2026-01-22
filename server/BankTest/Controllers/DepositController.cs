@@ -35,8 +35,7 @@ namespace BankBackendApp.Controllers
 
             var deposits = _depositRepository.GetDepositsByUser(userId);
 
-            if (deposits == null || !deposits.Any())
-                return NotFound();
+            
 
             var result = _mapper.Map<IEnumerable<DepositDto>>(deposits);
             return Ok(result);
@@ -75,10 +74,13 @@ namespace BankBackendApp.Controllers
                 User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
             );
 
-            if (!_depositService.AddMoneyToDeposit(userId, depositId, dto, out var error))
-                return BadRequest(error);
+            var deposit = _depositService.AddMoneyToDeposit(userId, depositId, dto, out var error);
 
-            return NoContent();
+            if (deposit == null)
+                return BadRequest(error);
+            var result = _mapper.Map<DepositDto>(_depositRepository.GetDeposiById(deposit.id));
+
+            return StatusCode(201, result);
         }
     }
 }

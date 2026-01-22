@@ -97,7 +97,7 @@ namespace BankBackendApp.Services
                 return null;
             }
         }
-        public bool AddMoneyToDeposit(int user_id, int depositId, AddMoneyToDepositDto dto, out string error)
+        public Deposit AddMoneyToDeposit(int user_id, int depositId, AddMoneyToDepositDto dto, out string error)
         {
             error = string.Empty;
 
@@ -113,46 +113,46 @@ namespace BankBackendApp.Services
                 if (deposit == null || deposit.user_id != user_id)
                 {
                     error = "Deposit not found or access denied";
-                    return false;
+                    return null;
                 }
 
                 if (!deposit.is_active)
                 {
                     error = "Deposit is not active";
-                    return false;
+                    return null;
                 }
 
                 if (!deposit.DepositType.can_add_money)
                 {
                     error = "This deposit type does not allow adding money";
-                    return false;
+                    return null;
                 }
 
                 var account = _context.account
-                    .FirstOrDefault(a => a.id == dto.account_id && a.user_id == user_id);
+                    .FirstOrDefault(a => a.number == dto.number && a.user_id == user_id);
 
                 if (account == null)
                 {
                     error = "Account not found";
-                    return false;
+                    return null;
                 }
 
                 if (account.currency_id != deposit.currency_id)
                 {
                     error = "Currency mismatch";
-                    return false;
+                    return null;
                 }
 
                 if (account.balance < dto.amount)
                 {
                     error = "Insufficient funds";
-                    return false;
+                    return null;
                 }
 
                 if (dto.amount <= 0)
                 {
                     error = "Invalid amount";
-                    return false;
+                    return null;
                 }
 
                 account.balance -= dto.amount;
@@ -164,13 +164,13 @@ namespace BankBackendApp.Services
                 _context.SaveChanges();
                 transaction.Commit();
 
-                return true;
+                return deposit;
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
                 error = ex.InnerException?.Message ?? ex.Message;
-                return false;
+                return null;
             }
         }
 
