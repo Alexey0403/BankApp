@@ -1,6 +1,7 @@
 'use client';
 
 import { apiFetch } from "@/lib/api";
+import { toast } from "@/services/toasts/toast";
 import { Currency } from "@/types/currency";
 import { useEffect, useState } from "react";
 
@@ -23,7 +24,9 @@ export const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
                 const json = await res.json();
                 setCurrencyList(json);
             } catch (err) {
-                console.error(err);
+                if (err instanceof Error) {
+                    toast.error(err.message);
+                };
             };
         };
         

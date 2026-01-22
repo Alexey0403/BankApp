@@ -7,10 +7,10 @@ export const navItems = [
         label: "Transactions",
         link: "/transactions",
     },
-    // {
-    //     label: "Savings",
-    //     link: "/savings",
-    // },
+    {
+        label: "Savings",
+        link: "/savings",
+    },
     {
         label: "Exchange rates",
         link: "/exchange-rates",

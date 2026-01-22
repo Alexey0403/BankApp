@@ -35,7 +35,9 @@ export const Accounts: React.FC = () => {
                     setAccountsList(json);
                 }
             } catch (err) {
-                console.error(err);
+                if (err instanceof Error) {
+                    toast.error(err.message);
+                };
             };
         };
 

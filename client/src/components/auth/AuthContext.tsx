@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getMe, login as loginApi, logout as logoutApi } from '@/services/auth/auth.service';
-import { usePathname, useRouter } from 'next/navigation';
+import { notFound, usePathname, useRouter } from 'next/navigation';
 import { IUser } from '@/types/user';
 
 type AuthContextType = {
@@ -22,24 +22,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
     useEffect(() => {
+        let isMounted = true;
+
         getMe()
-        .then(setUser)
+        .then(me => {
+            if (!isMounted) return;
+
+            setUser(me);
+
+            if (pathname === '/requests' && me.role_id !== 1) {
+                router.replace('/404');
+            };  
+        })
         .catch(() => {
+            if (!isMounted) return;
+            
             setUser(null);
 
             if (pathname === '/register') return;
-
-            if (pathname === '/requests' && user?.role_id !== 1) {
-                router.push('/404');
-            };
             
             const link = pathname === '/login' || pathname === '/'
                 ? '/login' 
                 : `/login?next=${encodeURIComponent(pathname)}`
             router.push(link);
         })
-        .finally(() => setLoading(false));
-    }, []);
+        .finally(() => isMounted && setLoading(false));
+
+        return () => {
+            isMounted = false
+        };
+    }, [pathname]);
 
     async function login(loginStr: string, password: string) {
         await loginApi(loginStr, password);
@@ -58,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
-        {children}
+            {children}
         </AuthContext.Provider>
     );
 };

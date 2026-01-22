@@ -26,13 +26,15 @@ export const Header: React.FC<IHeaderProps> = ({ hideNavMenu = false }) => {
 
     useEffect(() => {
         if (user?.role_id === 1) {
-            setMenuItems(prev => [
-                ...prev,
-                {
-                    label: 'Requests',
-                    link: '/requests'
-                },
-            ]);
+            if (!menuItems.find(m => m.link === '/requests')) {
+                setMenuItems(prev => [
+                    ...prev,
+                    {
+                        label: 'Requests',
+                        link: '/requests'
+                    },
+                ]);
+            };
         };
     }, [user]);
 

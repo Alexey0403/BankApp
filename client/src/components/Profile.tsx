@@ -18,8 +18,6 @@ export const Profile: React.FC = () => {
     const [editing, setEditing] = useState(false);
     const [form, setForm] = useState<ProfileForm | null>(null);
 
-    console.log(user)
-
     const toggleEditing = (e: React.FormEvent) => {
         e.preventDefault();
 
